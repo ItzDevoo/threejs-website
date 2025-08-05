@@ -1,0 +1,29 @@
+{
+  "name": "claude-automated-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio website with Claude Code GitHub issue automation",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "automation": "node automation/webhook-server.js",
+    "dev-all": "concurrently \"npm run dev\" \"npm run automation\""
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "tailwindcss": "^3.0.0",
+    "express": "^4.18.0",
+    "@octokit/rest": "^20.0.0",
+    "dotenv": "^16.0.0",
+    "chokidar": "^3.5.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0"
+  }
+}
