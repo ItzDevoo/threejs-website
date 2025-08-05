@@ -21,23 +21,36 @@ export default async function handler(req, res) {
   try {
     const { action, issue, repository } = req.body;
 
+    console.log(`📥 Webhook received - Action: ${action}`);
+    if (issue) {
+      console.log(`📋 Issue title: ${issue.title}`);
+      console.log(`👤 Issue author: ${issue.user?.login}`);
+      console.log(`🏷️ Has Claude tag: ${issue.title?.startsWith(CLAUDE_TAG) || issue.body?.startsWith(CLAUDE_TAG)}`);
+    }
+
     // Only process opened issues
     if (action !== 'opened') {
+      console.log(`⏭️ Ignoring action: ${action}`);
       return res.status(200).json({ message: 'Ignored: not a new issue' });
     }
 
     // Check if issue is from the correct user
     if (issue.user.login !== GITHUB_USERNAME) {
+      console.log(`❌ Wrong user: ${issue.user.login} (expected: ${GITHUB_USERNAME})`);
       return res.status(200).json({ message: 'Ignored: not from authorized user' });
     }
 
     // Check for Claude tag
     const hasClaudeTag = issue.title.startsWith(CLAUDE_TAG) || issue.body.startsWith(CLAUDE_TAG);
     if (!hasClaudeTag) {
+      console.log(`🏷️ No Claude tag found in title or body`);
       return res.status(200).json({ message: 'Ignored: no Claude tag found' });
     }
 
     console.log(`🤖 Processing Claude issue: ${issue.title}`);
+    console.log(`📝 Issue body: ${issue.body?.substring(0, 100)}...`);
+    console.log(`👤 Issue author: ${issue.user.login}`);
+    console.log(`🏢 Repository: ${repository.full_name}`);
 
     // Process the issue with Claude Code (async, don't wait)
     processIssueWithClaude(issue, repository);
@@ -66,10 +79,20 @@ Issue #${issue.number}
     const promptFile = path.join(PROJECT_ROOT, '.claude-issue-prompt.md');
     fs.writeFileSync(promptFile, claudePrompt);
 
-    // Execute Claude Code
-    const claudeCommand = `claude-code "${claudePrompt}"`;
+    // Execute Claude CLI with explicit non-interactive mode
+    const claudeCommand = `echo "${claudePrompt.replace(/"/g, '\\"')}" | claude`;
     
-    exec(claudeCommand, { cwd: PROJECT_ROOT }, async (error, stdout, stderr) => {
+    console.log(`🚀 Executing: ${claudeCommand}`);
+    
+    exec(claudeCommand, { 
+      cwd: PROJECT_ROOT,
+      timeout: 300000, // 5 minute timeout
+      maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+    }, async (error, stdout, stderr) => {
+      console.log('🔄 Claude CLI execution completed');
+      console.log('📤 stdout:', stdout);
+      console.log('📤 stderr:', stderr);
+      
       // Clean up temp file
       if (fs.existsSync(promptFile)) {
         fs.unlinkSync(promptFile);
@@ -77,24 +100,27 @@ Issue #${issue.number}
 
       let result;
       if (error) {
-        console.error('Claude Code error:', error);
+        console.error('❌ Claude CLI error:', error);
         result = {
           success: false,
           error: error.message,
-          output: stderr
+          output: stderr || stdout
         };
       } else {
-        console.log('Claude Code completed successfully');
+        console.log('✅ Claude CLI completed successfully');
         
         // Auto-commit and push changes
         try {
+          console.log('🔄 Starting auto-commit and push...');
           await autoCommitAndPush(issue);
+          console.log('✅ Auto-commit and push successful');
           result = {
             success: true,
             output: stdout,
             committed: true
           };
         } catch (commitError) {
+          console.error('❌ Auto-commit failed:', commitError);
           result = {
             success: true,
             output: stdout,
@@ -105,7 +131,13 @@ Issue #${issue.number}
       }
 
       // Post response back to GitHub
-      await postResponseToGitHub(issue, repository, result);
+      console.log('📝 Posting response to GitHub...');
+      try {
+        await postResponseToGitHub(issue, repository, result);
+        console.log('✅ GitHub response posted successfully');
+      } catch (githubError) {
+        console.error('❌ Failed to post to GitHub:', githubError);
+      }
     });
   } catch (error) {
     console.error('Error in processIssueWithClaude:', error);

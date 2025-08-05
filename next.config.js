@@ -2,9 +2,19 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  experimental: {
-    allowedDevOrigins: ['itzdevoo.com']
-  }
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: 'https://itzdevoo.com',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig
