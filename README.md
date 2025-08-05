@@ -1,4 +1,4 @@
-# Claude Automated Portfolio
+# Claude Automated Portfolio (Three.js Website)
 
 A Next.js portfolio website with automated GitHub issue resolution powered by Claude Code.
 
@@ -28,18 +28,13 @@ Edit `.env` with your values:
 
 ### 3. Start the System
 ```bash
-# Start both the website and automation server
-npm run dev-all
-
-# Or start them separately:
 npm run dev        # Next.js website (port 3000)
-npm run automation # Webhook server (port 3001)
 ```
 
 ### 4. Configure GitHub Webhooks
 1. Go to your GitHub repository settings
 2. Navigate to Webhooks
-3. Add webhook with URL: `https://your-cloudflare-tunnel.com/webhook/github`
+3. Add webhook with URL: `https://your-cloudflare-tunnel.com/api/webhook/github`
 4. Set content type to `application/json`
 5. Select "Issues" events
 
@@ -73,8 +68,6 @@ npm run automation # Webhook server (port 3001)
 ## Commands
 
 - `npm run dev` - Start Next.js development server
-- `npm run automation` - Start GitHub webhook server
-- `npm run dev-all` - Start both servers concurrently
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 
