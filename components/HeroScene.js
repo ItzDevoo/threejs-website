@@ -68,6 +68,12 @@ function AnimatedBox() {
 function FloatingText() {
   const [matcapTexture] = useMatcapTexture('7B5254_E9DCC7_B19986_C8AC91', 256);
 
+  // Temporarily disable Text3D until font file is available
+  // The Text3D component requires a font file that's currently missing
+  return null;
+  
+  // Original code commented out:
+  /*
   return (
     <Center>
       <Float speed={2} rotationIntensity={0.5} floatIntensity={0.8}>
@@ -88,6 +94,7 @@ function FloatingText() {
       </Float>
     </Center>
   );
+  */
 }
 
 function ParticleField() {
