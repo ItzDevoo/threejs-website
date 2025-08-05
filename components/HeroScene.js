@@ -127,7 +127,6 @@ function MinimalText() {
         color="#ffffff"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/inter-bold.woff"
         position={[0, -2, 0]}
       >
         DEVELOPER
@@ -166,10 +165,10 @@ function BackgroundSphere() {
 
 export default function HeroScene() {
   return (
-    <div className="h-screen w-full fixed top-0 left-0 -z-10">
+    <div className="h-full w-full absolute inset-0">
       <Canvas
-        style={{ background: '#0a0a0a' }}
-        gl={{ antialias: true, alpha: false }}
+        style={{ background: 'transparent' }}
+        gl={{ antialias: true, alpha: true }}
       >
         <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={75} />
         <ambientLight intensity={0.2} />
@@ -185,7 +184,6 @@ export default function HeroScene() {
         
         <InteractiveParticles />
         <FloatingGeometry />
-        <MinimalText />
         <BackgroundSphere />
         
         <fog attach="fog" args={['#0a0a0a', 5, 25]} />

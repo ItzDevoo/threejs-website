@@ -8,20 +8,14 @@ const ModernScene = dynamic(() => import('../components/ModernScene'), {
   loading: () => <div className="h-screen bg-black" />
 });
 
-export default function Home() {
-  const [currentSection, setCurrentSection] = useState('home');
+export default function Nexis() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const router = useRouter();
 
   const handleHomeClick = () => {
-    // Already on home page, no action needed
-    console.log('Already on home page');
-  };
-
-  const handleNexisClick = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      router.push('/nexis');
+      router.push('/');
     }, 150); // Small delay for smoother transition
   };
 
@@ -44,22 +38,28 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden bg-black">
+    <>
       <Head>
-        <title>ItzDevoo's Portfolio</title>
-        <meta name="description" content="Modern 3D portfolio experience" />
+        <title>Nexis - ItzDevoo's Portfolio</title>
+        <meta name="description" content="Nexis app by ItzDevoo - Coming Soon" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/assets/profile.png" />
       </Head>
 
-      <div className={`transition-opacity duration-300 ${isTransitioning ? 'opacity-75' : 'opacity-100'}`}>
-        <ModernScene 
-          currentSection={currentSection} 
-          setCurrentSection={setCurrentSection}
-          onHomeClick={handleHomeClick}
-          onNexisClick={handleNexisClick}
-        />
+      <div className="min-h-screen bg-black">
+        <div className="fixed inset-0 w-full h-full">
+          <div className={`transition-opacity duration-300 ${isTransitioning ? 'opacity-75' : 'opacity-100'}`}>
+            <ModernScene 
+              currentSection="nexis" 
+              setCurrentSection={() => {}} 
+              onHomeClick={handleHomeClick}
+            />
+          </div>
+        </div>
+        
+        {/* Invisible content to enable scrolling */}
+        <div className="relative z-0 h-[200vh]" />
       </div>
-    </div>
+    </>
   );
 }
