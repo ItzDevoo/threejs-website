@@ -131,11 +131,11 @@ Please make the requested changes to the appropriate files in this codebase.
       }, 100);
     });
     
-    // Add timeout handler
+    // Add timeout handler - generous timeout for complex tasks
     const timeoutId = setTimeout(() => {
       console.log('⏰ Timeout - killing Claude process');
       childProcess.kill();
-    }, 30000);
+    }, 300000); // 5 minutes for complex tasks
     
     childProcess.on('close', async (code) => {
       clearTimeout(timeoutId);
