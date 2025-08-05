@@ -1,5 +1,5 @@
 const { Octokit } = require('@octokit/rest');
-const { exec } = require('child_process');
+const { spawn, exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -71,43 +71,88 @@ ${issue.title.replace(CLAUDE_TAG, '').trim()}
 
 ${issue.body}
 
+This is a Next.js project with the following structure:
+- pages/index.js - Main homepage component
+- pages/api/ - API routes
+- components/ - React components  
+- styles/ - CSS files
+
 Repository: ${repository.full_name}
 Issue #${issue.number}
+
+Please make the requested changes to the appropriate files in this codebase.
 `;
 
     // Write prompt to temporary file
     const promptFile = path.join(PROJECT_ROOT, '.claude-issue-prompt.md');
     fs.writeFileSync(promptFile, claudePrompt);
 
-    // Execute Claude CLI with explicit non-interactive mode
-    const claudeCommand = `echo "${claudePrompt.replace(/"/g, '\\"')}" | claude`;
+    console.log(`🚀 Executing Claude Code CLI (using your existing Pro/Max authentication)`);
     
-    console.log(`🚀 Executing: ${claudeCommand}`);
+    console.log(`🚀 Executing: claude --print --permission-mode acceptEdits [prompt]`);
     
-    exec(claudeCommand, { 
+    // Use spawn with stdin input instead of argument
+    const claudePath = process.platform === 'win32' ? 'claude.cmd' : 'claude';
+    const childProcess = spawn(claudePath, ['--print', '--permission-mode', 'acceptEdits'], {
       cwd: PROJECT_ROOT,
-      timeout: 300000, // 5 minute timeout
-      maxBuffer: 1024 * 1024 * 10 // 10MB buffer
-    }, async (error, stdout, stderr) => {
-      console.log('🔄 Claude CLI execution completed');
+      env: { ...process.env },
+      shell: true
+    });
+    
+    // Send prompt via stdin
+    childProcess.stdin.write(claudePrompt);
+    childProcess.stdin.end();
+    
+    let stdout = '';
+    let stderr = '';
+    
+    childProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+    
+    childProcess.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+    
+    childProcess.on('error', (error) => {
+      console.error('❌ Spawn error:', error);
+      // Handle spawn errors immediately
+      setTimeout(async () => {
+        const result = {
+          success: false,
+          error: `Failed to spawn Claude: ${error.message}`,
+          output: ''
+        };
+        try {
+          await postResponseToGitHub(issue, repository, result);
+        } catch (githubError) {
+          console.error('❌ Failed to post error to GitHub:', githubError);
+        }
+      }, 100);
+    });
+    
+    // Add timeout handler
+    const timeoutId = setTimeout(() => {
+      console.log('⏰ Timeout - killing Claude process');
+      childProcess.kill();
+    }, 30000);
+    
+    childProcess.on('close', async (code) => {
+      clearTimeout(timeoutId);
+      console.log('🔄 Claude Code execution completed');
       console.log('📤 stdout:', stdout);
       console.log('📤 stderr:', stderr);
       
-      // Clean up temp file
-      if (fs.existsSync(promptFile)) {
-        fs.unlinkSync(promptFile);
-      }
-
       let result;
-      if (error) {
-        console.error('❌ Claude CLI error:', error);
+      if (code !== 0) {
+        console.error('❌ Claude Code error - exit code:', code);
         result = {
           success: false,
-          error: error.message,
+          error: `Claude exited with code ${code}`,
           output: stderr || stdout
         };
       } else {
-        console.log('✅ Claude CLI completed successfully');
+        console.log('✅ Claude Code completed successfully');
         
         // Auto-commit and push changes
         try {
@@ -139,6 +184,11 @@ Issue #${issue.number}
         console.error('❌ Failed to post to GitHub:', githubError);
       }
     });
+    
+    // Clean up temp file
+    if (fs.existsSync(promptFile)) {
+      fs.unlinkSync(promptFile);
+    }
   } catch (error) {
     console.error('Error in processIssueWithClaude:', error);
   }

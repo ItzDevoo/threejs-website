@@ -1,3 +1,4 @@
+// Stdin works!
 import Head from 'next/head';
 
 export default function Home() {
@@ -12,7 +13,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-16">
         <div className="text-center text-white">
           <h1 className="text-6xl font-bold mb-6">
-            Welcome to My Portfolio
+            Welcome to My Magical Portfolio!
           </h1>
           <p className="text-xl mb-8 text-gray-300">
             Powered by Claude Code Automation
@@ -20,8 +21,8 @@ export default function Home() {
           
           <div className="bg-white/10 backdrop-blur-lg rounded-lg p-8 max-w-2xl mx-auto">
             <h2 className="text-2xl font-semibold mb-4">🤖 Claude Automation Active</h2>
-            <p className="text-gray-200">
-              This portfolio is automatically maintained by Claude Code. 
+            <p className="text-gray-200 text-2xl text-justify">
+              This portfolio is automatically maintained by Claude Code.<br />
               Create a GitHub issue starting with "(Claude)" and watch the magic happen!
             </p>
             
