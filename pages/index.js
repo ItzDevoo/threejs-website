@@ -1,12 +1,19 @@
 // Stdin works!
 import Head from 'next/head';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { ModernButton, FloatingActionButton, IconButton } from '../components/ModernButton';
+
+const HeroScene = dynamic(() => import('../components/HeroScene'), {
+  ssr: false,
+  loading: () => <div className="h-[500px] flex items-center justify-center"><div className="text-gray-500">Loading 3D Scene...</div></div>
+});
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-animated">
       <Head>
         <title>Claude Automated Portfolio</title>
         <meta name="description" content="Portfolio with Claude Code automation" />
@@ -15,17 +22,17 @@ export default function Home() {
       </Head>
 
       {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+      <nav className="glass-effect shadow-lg sticky top-0 z-50 transition-all duration-300">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 text-center flex-1 md:flex-initial md:text-left">My Portfolio</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-gradient text-center flex-1 md:flex-initial md:text-left">My Portfolio</h2>
             
             {/* Mobile menu button */}
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none"
+              className="md:hidden p-2 rounded-md hover:bg-white/10 dark:hover:bg-black/10 focus:outline-none transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-800 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -36,19 +43,19 @@ export default function Home() {
             
             {/* Desktop menu */}
             <div className="hidden md:flex space-x-6">
-              <a href="#about" className="text-gray-600 hover:text-gray-900 transition">About</a>
-              <a href="#projects" className="text-gray-600 hover:text-gray-900 transition">Projects</a>
-              <a href="#contact" className="text-gray-600 hover:text-gray-900 transition">Contact</a>
+              <a href="#about" className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition font-medium">About</a>
+              <a href="#projects" className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition font-medium">Projects</a>
+              <a href="#contact" className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition font-medium">Contact</a>
             </div>
           </div>
           
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden mt-4 pb-4 border-t pt-4">
+            <div className="md:hidden mt-4 pb-4 border-t pt-4 border-gray-200/20 dark:border-gray-700/20">
               <div className="flex flex-col space-y-3 text-center">
-                <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-gray-600 hover:text-gray-900 transition py-2">About</a>
-                <a href="#projects" onClick={() => setMobileMenuOpen(false)} className="text-gray-600 hover:text-gray-900 transition py-2">Projects</a>
-                <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="text-gray-600 hover:text-gray-900 transition py-2">Contact</a>
+                <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition py-2 font-medium">About</a>
+                <a href="#projects" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition py-2 font-medium">Projects</a>
+                <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition py-2 font-medium">Contact</a>
               </div>
             </div>
           )}
@@ -56,36 +63,43 @@ export default function Home() {
       </nav>
 
       <main>
-        {/* Hero Section */}
-        <section className="container mx-auto px-6 sm:px-8 md:px-4 py-16 md:py-24 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Welcome to My Portfolio
+        {/* Hero Section with Three.js */}
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <HeroScene />
+          </div>
+          <div className="container mx-auto px-6 sm:px-8 md:px-4 py-16 md:py-24 text-center relative z-10">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-fade-in">
+            <span className="text-gradient-animated">Welcome to My</span>
+            <br />
+            <span className="text-gradient">3D Portfolio</span>
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto px-4">
+          <p className="text-base sm:text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-10 max-w-2xl mx-auto px-4">
             Full Stack Developer | Claude Code Automation Enthusiast
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
-            <a href="#projects" className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-medium shadow-md hover:shadow-lg">
+            <ModernButton href="#projects" variant="glow">
               View My Work
-            </a>
-            <a href="#contact" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 transition font-medium">
+            </ModernButton>
+            <ModernButton href="#contact" variant="secondary">
               Get In Touch
-            </a>
+            </ModernButton>
+          </div>
           </div>
         </section>
 
         {/* About Section */}
-        <section id="about" className="bg-white py-16 md:py-20">
+        <section id="about" className="glass-effect py-16 md:py-20">
           <div className="container mx-auto px-6 sm:px-8 md:px-4">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-10">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gradient mb-10">
               About Me
             </h2>
             <div className="max-w-3xl mx-auto text-center px-4">
-              <p className="text-gray-600 text-base sm:text-lg leading-relaxed mb-6">
+              <p className="text-gray-700 dark:text-gray-300 text-base sm:text-lg leading-relaxed mb-6">
                 I'm a passionate developer who loves creating innovative solutions. This portfolio 
                 showcases my work and is powered by cutting-edge Claude Code automation.
               </p>
-              <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
+              <p className="text-gray-700 dark:text-gray-300 text-base sm:text-lg leading-relaxed">
                 I specialize in modern web technologies including Next.js, Three.js, and AI-powered 
                 development workflows. My approach combines clean code with intelligent automation.
               </p>
@@ -94,44 +108,71 @@ export default function Home() {
         </section>
 
         {/* Projects Section */}
-        <section id="projects" className="py-16 md:py-20">
+        <section id="projects" className="py-16 md:py-20 relative overflow-hidden">
           <div className="container mx-auto px-6 sm:px-8 md:px-4">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gradient mb-12">
               Featured Projects
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 px-2 sm:px-0">
-              <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600"></div>
+              <div className="modern-card rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group">
+                <div className="h-48 bg-gradient-to-br from-lime-400 to-teal-600 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
                 <div className="p-6 text-center">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Project One</h3>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Project One</h3>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 leading-relaxed">
                     A full-stack application built with Next.js and modern tools.
                   </p>
-                  <a href="#" className="inline-block text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors">
+                  <a href="#" className="inline-block text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium text-sm transition-colors">
                     Learn More →
                   </a>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div className="h-48 bg-gradient-to-br from-purple-400 to-purple-600"></div>
+              <div className="modern-card rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group">
+                <div className="h-48 bg-gradient-to-br from-teal-400 to-lime-600 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
                 <div className="p-6 text-center">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Project Two</h3>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Project Two</h3>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 leading-relaxed">
                     Interactive 3D experiences using Three.js and WebGL.
                   </p>
-                  <a href="#" className="inline-block text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors">
+                  <a href="#" className="inline-block text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium text-sm transition-colors">
                     Learn More →
                   </a>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div className="h-48 bg-gradient-to-br from-green-400 to-green-600"></div>
+              <div className="modern-card rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group">
+                <div className="h-48 bg-gradient-to-br from-lime-500 to-teal-500 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
                 <div className="p-6 text-center">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Project Three</h3>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Project Three</h3>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 leading-relaxed">
                     AI-powered automation tools and workflows.
                   </p>
-                  <a href="#" className="inline-block text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors">
+                  <a href="#" className="inline-block text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium text-sm transition-colors">
                     Learn More →
                   </a>
                 </div>
@@ -141,7 +182,7 @@ export default function Home() {
         </section>
 
         {/* Claude Automation Section */}
-        <section className="bg-gray-900 text-white py-16 md:py-20">
+        <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 md:py-20">
           <div className="container mx-auto px-6 sm:px-8 md:px-4">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10">
               Powered by Claude Automation
@@ -153,7 +194,7 @@ export default function Home() {
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <div className="bg-green-500/20 rounded-xl p-6 hover:bg-green-500/30 transition-colors">
+                  <div className="bg-gradient-to-br from-lime-500/20 to-lime-600/20 rounded-xl p-6 hover:from-lime-500/30 hover:to-lime-600/30 transition-all duration-300 border border-lime-500/20">
                     <h3 className="text-lg sm:text-xl font-semibold mb-3">Auto-Fix Issues</h3>
                     <p className="text-gray-400 text-sm">
                       Create tagged issues and get instant fixes
@@ -161,7 +202,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="bg-blue-500/20 rounded-xl p-6 hover:bg-blue-500/30 transition-colors">
+                  <div className="bg-gradient-to-br from-teal-500/20 to-teal-600/20 rounded-xl p-6 hover:from-teal-500/30 hover:to-teal-600/30 transition-all duration-300 border border-teal-500/20">
                     <h3 className="text-lg sm:text-xl font-semibold mb-3">Auto-Deploy</h3>
                     <p className="text-gray-400 text-sm">
                       Changes are pushed and deployed instantly
@@ -169,7 +210,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="bg-purple-500/20 rounded-xl p-6 hover:bg-purple-500/30 transition-colors">
+                  <div className="bg-gradient-to-br from-lime-600/20 to-teal-500/20 rounded-xl p-6 hover:from-lime-600/30 hover:to-teal-500/30 transition-all duration-300 border border-teal-500/20">
                     <h3 className="text-lg sm:text-xl font-semibold mb-3">Auto-Response</h3>
                     <p className="text-gray-400 text-sm">
                       Get detailed reports on every fix
@@ -182,22 +223,22 @@ export default function Home() {
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="bg-white py-16 md:py-20">
+        <section id="contact" className="glass-effect py-16 md:py-20">
           <div className="container mx-auto px-6 sm:px-8 md:px-4">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-10">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gradient mb-10">
               Get In Touch
             </h2>
             <div className="max-w-2xl mx-auto text-center px-4">
-              <p className="text-gray-600 text-base sm:text-lg mb-8">
+              <p className="text-gray-700 dark:text-gray-300 text-base sm:text-lg mb-8">
                 I'm always open to discussing new projects and opportunities.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="mailto:hello@example.com" className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-medium shadow-md hover:shadow-lg">
+                <ModernButton href="mailto:hello@example.com" variant="primary">
                   Email Me
-                </a>
-                <a href="https://github.com" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 transition font-medium">
+                </ModernButton>
+                <ModernButton href="https://github.com" variant="secondary">
                   GitHub
-                </a>
+                </ModernButton>
               </div>
             </div>
           </div>
@@ -205,13 +246,23 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8">
+      <footer className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-8">
         <div className="container mx-auto px-6 sm:px-8 md:px-4 text-center">
           <p className="text-gray-400 text-sm">
             © 2025 My Portfolio. Powered by Claude Code Automation.
           </p>
         </div>
       </footer>
+      
+      {/* Floating Action Button */}
+      <FloatingActionButton 
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        icon={
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 11l7-7 7 7M5 19l7-7 7 7" />
+          </svg>
+        }
+      />
     </div>
   );
 }
