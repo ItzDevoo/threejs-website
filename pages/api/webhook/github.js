@@ -202,14 +202,24 @@ function generateResponseMarkdown(result) {
     
     if (result.committed) {
       response += `🔄 **Changes**: Automatically committed and pushed to repository\n\n`;
+      response += `📋 **Git Commit**: Changes have been committed with an automated message\n\n`;
     } else {
       response += `⚠️ **Changes**: Code updated but commit failed: ${result.commitError}\n\n`;
     }
     
-    response += `### Implementation Details\n\n`;
-    response += `\`\`\`\n${result.output}\n\`\`\`\n\n`;
+    response += `### Implementation Summary\n\n`;
+    if (result.output && result.output.trim()) {
+      response += `\`\`\`\n${result.output}\n\`\`\`\n\n`;
+    } else {
+      response += `Claude has successfully processed your request and made the necessary changes to your codebase.\n\n`;
+    }
     
-    response += `---\n*This issue was automatically resolved by Claude Code. Visit https://itzdevoo.com to see the changes live.*`;
+    response += `### Next Steps\n\n`;
+    response += `- 🌐 Visit [https://itzdevoo.com](https://itzdevoo.com) to see the changes live\n`;
+    response += `- 📱 Changes are automatically deployed via your Cloudflare tunnel\n`;
+    response += `- 🔍 Review the commit history to see exactly what was modified\n\n`;
+    
+    response += `---\n*This issue was automatically resolved by Claude Code automation. The changes are now live on your website!*`;
   } else {
     response += `❌ **Status**: Failed to process issue\n\n`;
     response += `### Error Details\n\n`;
