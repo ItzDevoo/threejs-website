@@ -325,13 +325,17 @@ function ProjectsHeader({ isMobile }) {
   );
 }
 
-// Interactive profile picture button
-function ProfileButton({ onHomeClick, isNexisPage }) {
-  const meshRef = useRef();
+// Nexis Home Button - Interactive particle icon
+function NexisHomeButton({ onHomeClick, isNexisPage }) {
+  const particlesRef = useRef();
+  const groupRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const texture = useLoader(THREE.TextureLoader, '/assets/profile.png');
-
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const [isInitialized, setIsInitialized] = useState(false);
+  const originalPositions = useRef(null);
+  const texture = useLoader(THREE.TextureLoader, '/assets/nexis.png');
+  
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -342,46 +346,182 @@ function ProfileButton({ onHomeClick, isNexisPage }) {
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      const targetScale = hovered ? 1.1 : 1;
-      meshRef.current.scale.setScalar(
-        meshRef.current.scale.x + (targetScale - meshRef.current.scale.x) * 0.1
-      );
-      
-      meshRef.current.rotation.y = Math.sin(state.clock.getElapsedTime() * 0.3) * 0.1;
-      const baseY = isMobile ? -1.8 : -4.5;
-      meshRef.current.position.y = baseY + Math.sin(state.clock.getElapsedTime() * 0.5) * 0.3;
+  
+  // Create particle positions from image
+  const { positions, colors, initialPositions } = useMemo(() => {
+    if (!texture.image) return { positions: new Float32Array(0), colors: new Float32Array(0), initialPositions: new Float32Array(0) };
+    
+    // Create canvas to read pixel data
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const size = 128; // Smaller size for home button
+    canvas.width = size;
+    canvas.height = size;
+    
+    // Draw image to canvas
+    ctx.drawImage(texture.image, 0, 0, size, size);
+    const imageData = ctx.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    
+    const positions = [];
+    const colors = [];
+    
+    // Sample pixels
+    const step = 4; // Less dense for performance
+    for (let y = 0; y < size; y += step) {
+      for (let x = 0; x < size; x += step) {
+        const index = (y * size + x) * 4;
+        const alpha = data[index + 3];
+        
+        if (alpha > 128) {
+          // Position in 3D space (smaller scale for button)
+          positions.push(
+            (x - size / 2) * 0.01,
+            -(y - size / 2) * 0.01,
+            (Math.random() - 0.5) * 0.2
+          );
+          
+          // Color from pixel
+          colors.push(
+            data[index] / 255,
+            data[index + 1] / 255,
+            data[index + 2] / 255
+          );
+        }
+      }
     }
-  });
+    
+    const initialPositions = new Float32Array(positions);
+    
+    return {
+      positions: new Float32Array(positions),
+      colors: new Float32Array(colors),
+      initialPositions: initialPositions
+    };
+  }, [texture]);
+  
+  // Initialize positions
+  useEffect(() => {
+    if (particlesRef.current && initialPositions.length > 0 && !isInitialized) {
+      const geometry = particlesRef.current.geometry;
+      const positionAttribute = geometry.attributes.position;
+      
+      originalPositions.current = new Float32Array(initialPositions.length);
+      for (let i = 0; i < initialPositions.length; i++) {
+        originalPositions.current[i] = initialPositions[i];
+        positionAttribute.array[i] = initialPositions[i];
+      }
+      
+      positionAttribute.needsUpdate = true;
+      setIsInitialized(true);
+    }
+  }, [initialPositions, isInitialized]);
 
+  // Animation
+  useFrame((state) => {
+    if (!groupRef.current || !particlesRef.current || !isInitialized || !originalPositions.current) return;
+    
+    const time = state.clock.getElapsedTime();
+    const geometry = particlesRef.current.geometry;
+    const positionAttribute = geometry.attributes.position;
+    
+    // Gentle rotation
+    groupRef.current.rotation.y = Math.sin(time * 0.3) * 0.1;
+    
+    // Float animation
+    const baseY = isMobile ? -1.8 : -4.5;
+    groupRef.current.position.y = baseY + Math.sin(time * 0.5) * 0.3;
+    
+    // Particle movement on hover
+    if (hovered) {
+      for (let i = 0; i < positionAttribute.count; i++) {
+        const i3 = i * 3;
+        
+        const originalX = originalPositions.current[i3];
+        const originalY = originalPositions.current[i3 + 1];
+        const originalZ = originalPositions.current[i3 + 2];
+        
+        // Subtle expansion effect
+        const expandFactor = 1.2;
+        
+        positionAttribute.array[i3] = THREE.MathUtils.lerp(
+          positionAttribute.array[i3],
+          originalX * expandFactor,
+          0.1
+        );
+        positionAttribute.array[i3 + 1] = THREE.MathUtils.lerp(
+          positionAttribute.array[i3 + 1],
+          originalY * expandFactor,
+          0.1
+        );
+        positionAttribute.array[i3 + 2] = originalZ;
+      }
+    } else {
+      // Return to original positions
+      for (let i = 0; i < positionAttribute.count; i++) {
+        const i3 = i * 3;
+        positionAttribute.array[i3] = THREE.MathUtils.lerp(
+          positionAttribute.array[i3],
+          originalPositions.current[i3],
+          0.1
+        );
+        positionAttribute.array[i3 + 1] = THREE.MathUtils.lerp(
+          positionAttribute.array[i3 + 1],
+          originalPositions.current[i3 + 1],
+          0.1
+        );
+        positionAttribute.array[i3 + 2] = originalPositions.current[i3 + 2];
+      }
+    }
+    
+    positionAttribute.needsUpdate = true;
+  });
+  
   const handleClick = () => {
     if (isNexisPage && onHomeClick) {
       onHomeClick();
     } else {
-      console.log('Profile button clicked on home page');
+      console.log('Nexis home button clicked');
     }
   };
-
+  
+  if (positions.length === 0) return null;
+  
   return (
     <group>
-      {/* Main profile picture */}
       <Float speed={1} rotationIntensity={0.2} floatIntensity={0.5}>
-        <mesh 
-          ref={meshRef} 
+        <group
+          ref={groupRef}
           position={[0, isMobile ? -1.8 : -4.5, 0]}
           onPointerOver={() => setHovered(true)}
           onPointerOut={() => setHovered(false)}
           onClick={handleClick}
         >
-          <circleGeometry args={[isMobile ? 0.8 : 1, 32]} />
-          <meshBasicMaterial
-            map={texture}
-            transparent
-            opacity={hovered ? 1 : 0.9}
-          />
-        </mesh>
+          <points ref={particlesRef}>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={initialPositions.length / 3}
+                array={initialPositions}
+                itemSize={3}
+              />
+              <bufferAttribute
+                attach="attributes-color"
+                count={colors.length / 3}
+                array={colors}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <pointsMaterial
+              size={isMobile ? 0.015 : 0.02}
+              vertexColors
+              transparent
+              opacity={0.95}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+            />
+          </points>
+        </group>
       </Float>
 
       {/* Social media buttons - only show on home page */}
@@ -698,7 +838,7 @@ export default function ModernScene({ currentSection, setCurrentSection, onHomeC
           </>
         )}
         
-        <ProfileButton onHomeClick={onHomeClick} isNexisPage={isNexisPage} />
+        <NexisHomeButton onHomeClick={onHomeClick} isNexisPage={isNexisPage} />
 
 
         <fog attach="fog" args={['#000000', 10, 50]} />
